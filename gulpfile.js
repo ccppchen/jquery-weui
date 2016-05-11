@@ -5,6 +5,9 @@ var connect = require("gulp-connect");
 var less = require("gulp-less");
 var autoprefixer = require('gulp-autoprefixer');
 var ejs = require("gulp-ejs");
+var uglify = require('gulp-uglify');
+var ext_replace = require('gulp-ext-replace');
+var cssmin = require('gulp-cssmin');
 
 var pkg = require("./package.json");
 
@@ -15,20 +18,30 @@ var banner =
 * http://lihongxun945.github.io/jquery-weui/\n \
 */\n";
 
-gulp.task('js', function() {
+gulp.task('js', function(cb) {
+
+  count = 0;
+  var end = function(){
+    count ++;
+    if(count >= 3) cb();
+  };
+
   gulp.src([
     './src/js/city-data.js',
     './src/js/city-picker.js'
   ])
     .pipe(concat({ path: 'city-picker.js'}))
-    .pipe(gulp.dest('./dist/js/'));
+    .pipe(gulp.dest('./dist/js/'))
+    .on("end", end);
 
   gulp.src([
     './src/js/swiper.jquery.js',
-    './src/js/swiper-wrap.js'
+    './src/js/swiper-wrap.js',
+    './src/js/photo-browser.js'
   ])
     .pipe(concat({ path: 'swiper.js'}))
-    .pipe(gulp.dest('./dist/js/'));
+    .pipe(gulp.dest('./dist/js/'))
+    .on("end", end);
 
   gulp.src([
     './src/js/jquery-extend.js',
@@ -37,11 +50,30 @@ gulp.task('js', function() {
     './src/js/picker.js',
     './src/js/select.js',
     './src/js/calendar.js',
+<<<<<<< HEAD
     './src/js/datetime-picker.js'
+=======
+    './src/js/datetime-picker.js',
+    './src/js/popup.js',
+    './src/js/notification.js',
+    './src/js/photo-browser.js'
+>>>>>>> 36cf56b7b6741cadb91cb563753f114c83ec50c7
   ])
     .pipe(concat({ path: 'jquery-weui.js'}))
     .pipe(header(banner))
-    .pipe(gulp.dest('./dist/js/'));
+    .pipe(gulp.dest('./dist/js/'))
+    .on("end", end);
+
+  
+});
+
+gulp.task('uglify', ["js"], function() {
+  return gulp.src(['./dist/js/*.js', '!./dist/js/*.min.js'])
+    .pipe(uglify({
+      preserveComments: "license"
+    }))
+    .pipe(ext_replace('.min.js'))
+    .pipe(gulp.dest('./dist/js'));
 });
 
 gulp.task('less', function () {
@@ -50,6 +82,14 @@ gulp.task('less', function () {
   .pipe(autoprefixer())
   .pipe(header(banner))
   .pipe(gulp.dest('./dist/css/'));
+});
+
+gulp.task('cssmin', ["less"], function () {
+  gulp.src(['./dist/css/*.css', '!./dist/css/*.min.css'])
+    .pipe(cssmin())
+    .pipe(header(banner))
+    .pipe(ext_replace('.min.css'))
+    .pipe(gulp.dest('./dist/css/'));
 });
 
 gulp.task('ejs', function () {
@@ -79,4 +119,8 @@ gulp.task('watch', function () {
 gulp.task('server', function () {
   connect.server();
 });
+<<<<<<< HEAD
 gulp.task("default", ['js', 'less', 'copy', 'ejs', 'server']);
+=======
+gulp.task("default", ['uglify', 'cssmin', 'copy', 'ejs']);
+>>>>>>> 36cf56b7b6741cadb91cb563753f114c83ec50c7
